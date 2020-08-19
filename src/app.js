@@ -18,46 +18,27 @@ const repositories = new Array;
   });
   
   app.post("/repositories", (request, response) => {
-    const  { id = uuid(), title , url , techs, likes} = request.body
-    const repositorie = {
-      id,
-      likes : Number(0),
-      title , 
-      url ,
-      techs,
-    }
-    repositories.push(repositorie)
+    const { title, url, techs } = request.body;
+    const data = { id: uuid(), title, url, techs, likes: 0 };
+    
+    repositories.push(data);
+    
+    return response.json(data)
+  });
 
-    return response.status(200).json(repositorie)
-
-});
-
-app.put("/repositories/:id", (request, response) => {
-
-      const {id} = request.params
-
-      const { title, url, techs, likes } = request.body
-
-      const repositorieIndex  =  repositories.findIndex(repositorie =>  repositorie.id === id );
-
-      if(repositorieIndex < 0) { 
-        return response.status(400).json({message : 'not found '}) 
-      };
-
-      const repositorie = {
-        id,
-        title,
-        url,
-        techs,
-      }
-      if(likes ==! repositories.likes) {
-        response.status(400).json({err : `not permited`})
-      }
-      repositories[repositorieIndex] = repositorie
-
-      return response.json(repositorie)
-
-});
+  app.put("/repositories/:id", (request, response) => {
+    const { title, url, techs } = request.body;
+    const {id} = request.params;
+    
+    let repo = repositories.find( repo => repo.id === id )
+     
+    if (!repo)
+      return response.status(400).json({ error: "Repository not found." })
+    
+    repo = {...repo, title, url, techs}
+  
+    return response.json(repo)
+  });
 
 app.delete("/repositories/:id", (request, response) => {
   const {id} = request.params
@@ -73,15 +54,16 @@ app.delete("/repositories/:id", (request, response) => {
 });
 
 app.post("/repositories/:id/like", (request, response) => {
-  const { id } = request.params;
+  const { id } = request.params
 
-  const repositorie = repositories.find((rep) => rep.id === id);
-  if(!repositorie) {
-    response.status(400).json({err : 'not permited '})
-  }
-  repositorie.likes += 1;
+  const repository = repositories.find( repository => repository.id === id )
+  
+  if (!repository)
+    return response.status(400).json({ error: "Repository not found." })
+  
+  repository.likes += 1
 
-  return response.json(repositorie.likes);
+  return response.json(repository)
 });
 
 module.exports = app;
